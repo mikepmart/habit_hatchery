@@ -1,0 +1,15 @@
+{
+  "next_id": 2,
+  "habits": [
+    {
+      "id": 1,
+      "name": "Workout",
+      "schedule": "daily"
+    }
+  ],
+  "completions": {
+    "2025-11-02": [
+      1
+    ]
+  }
+}
