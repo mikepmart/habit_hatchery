@@ -51,3 +51,16 @@ class JSONRepo:
             ids.remove(habit_id)
         self.data["completions"][key] = ids
         self._write(self.data)
+
+    def delete_habit(self, habit_id: int):
+        # remove from habits
+        self.data["habits"] = [h for h in self.data["habits"] if h["id"] != habit_id]
+        # remove any completions referencing it
+        for day, ids in list(self.data["completions"].items()):
+            new_ids = [i for i in ids if i != habit_id]
+            if new_ids:
+                self.data["completions"][day] = new_ids
+            else:
+                # optional: drop empty day entries to keep file tidy
+                self.data["completions"].pop(day, None)
+        self._write(self.data)

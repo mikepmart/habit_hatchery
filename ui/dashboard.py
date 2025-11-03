@@ -1,6 +1,7 @@
 # ui/dashboard.py
 import tkinter as tk
 from datetime import date
+import tkinter.messagebox as mbox
 
 HILITE_BG = "#e8f1ff"   # light highlight color
 
@@ -12,6 +13,8 @@ class Dashboard(tk.Frame):
         tk.Label(self, text="Habit Hatchery", font=("Segoe UI", 16, "bold")).pack(pady=6)
         tk.Label(self, text="Complete a habit to feed your creature and help it grow.").pack()  # IH#1 benefits
         tk.Label(self, text="").pack()  # spacing
+
+
 
         top = tk.Frame(self); top.pack(fill="x", padx=10)
         tk.Button(top, text="➕ Create Habit", command=lambda: controller.show("CreateHabit")).pack(side="left")
@@ -28,11 +31,14 @@ class Dashboard(tk.Frame):
         self.rows = []             # list of dicts: {"frame":..., "btn":..., "id":...}
         self.selected_idx = None   # int index into self.rows
 
+
+
         # Global keybindings for selection & action
         self.bind_all("<Up>", self._move_up)
         self.bind_all("<Down>", self._move_down)
         self.bind_all("<Return>", self._activate_selected)
         self.bind_all("<space>", self._activate_selected)
+        self.bind_all("<Delete>", self._delete_selected)
 
     def refresh(self):
         for w in self.list_frame.winfo_children():
@@ -62,6 +68,10 @@ class Dashboard(tk.Frame):
             # Clickable name that selects the row
             name = tk.Label(row, text=h.name, anchor="w")
             name.pack(side="left", padx=10, fill="x")
+
+            del_btn = tk.Button(row, text="Delete", width=8, fg="#a00")
+            del_btn["command"] = lambda hid=h.id: self._delete_habit(hid)
+            del_btn.pack(side="right", padx=6)
 
             # Make the whole row clickable/selectable
             def bind_select(widget, idx=i):
@@ -102,14 +112,35 @@ class Dashboard(tk.Frame):
         row = self.rows[self.selected_idx]
         self.toggle(row["btn"], row["id"])
 
+    def _delete_habit(self, habit_id: int):
+        if not mbox.askyesno("Delete habit?",
+                             "Are you sure you want to delete this habit?\nThis removes today's completion too."):
+            return
+        self.controller.repo.delete_habit(habit_id)
+        self.refresh()
+
+    def _delete_selected(self, _event=None):
+        if self.selected_idx is None or not self.rows:
+            return
+        hid = self.rows[self.selected_idx]["id"]
+        self._delete_habit(hid)
+
     # ---------- Completion toggle ----------
     def toggle(self, button: tk.Button, habit_id: int):
+        from datetime import date
         today = date.today()
         repo = self.controller.repo
-        done = (button["text"] != "✓ Completed")
-        repo.set_completed(habit_id, today, done)
-        button.configure(text=("✓ Completed" if done else "Complete"))
 
-        # quick feedback (<1s)
-        self.creature.configure(text="✨🐣✨")
-        self.after(300, lambda: self.creature.configure(text="🐣"))
+        # Determine what we're about to do
+        will_complete = (button["text"] != "✓ Completed")
+
+        # Persist first
+        repo.set_completed(habit_id, today, will_complete)
+
+        # Update UI text
+        button.configure(text=("✓ Completed" if will_complete else "Complete"))
+
+        # Animate ONLY on complete (not on undo)
+        if will_complete:
+            self.creature.configure(text="✨🐣✨")
+            self.after(300, lambda: self.creature.configure(text="🐣"))
