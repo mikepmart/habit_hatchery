@@ -1,15 +1,21 @@
 {
-  "next_id": 2,
+  "next_id": 3,
   "habits": [
     {
       "id": 1,
       "name": "Workout",
+      "schedule": "daily"
+    },
+    {
+      "id": 2,
+      "name": "Feed Dogs",
       "schedule": "daily"
     }
   ],
   "completions": {
     "2025-11-02": [
       1
-    ]
+    ],
+    "2025-11-03": []
   }
 }
