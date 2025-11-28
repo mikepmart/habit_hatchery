@@ -1,5 +1,21 @@
 {
-  "next_id": 4,
-  "habits": [],
-  "completions": {}
+  "next_id": 6,
+  "habits": [
+    {
+      "id": 4,
+      "name": "take out trash",
+      "schedule": "daily"
+    },
+    {
+      "id": 5,
+      "name": "work out",
+      "schedule": "weekly:Mon,Wed,Fri"
+    }
+  ],
+  "completions": {
+    "2025-11-28": [
+      5,
+      4
+    ]
+  }
 }

@@ -64,3 +64,21 @@ class JSONRepo:
                 # optional: drop empty day entries to keep file tidy
                 self.data["completions"].pop(day, None)
         self._write(self.data)
+
+    # -------- Analytics helpers --------
+    def completion_dates_by_habit(self) -> Dict[int, List[str]]:
+        """
+        Returns a mapping of habit_id -> sorted list of ISO date strings
+        representing when each habit was completed.
+        """
+        habits = {h.id for h in self.list_habits()}
+        dates: Dict[int, List[str]] = {hid: [] for hid in habits}
+
+        for day, ids in self.data["completions"].items():
+            for hid in ids:
+                if hid in habits:
+                    dates.setdefault(hid, []).append(day)
+
+        for hid in list(dates.keys()):
+            dates[hid].sort()
+        return dates

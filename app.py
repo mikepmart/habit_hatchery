@@ -1,25 +1,30 @@
 import tkinter as tk
+
 from repo_json import JSONRepo
-from ui.dashboard import Dashboard
+from ui.dashboard import Hatchery
 from ui.create_habit import CreateHabit
+from ui.analytics import Analytics
+from ui.start_screen import StartScreen
+from ui import theme
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Habit Hatchery")
-        self.geometry("520x460")
+        self.geometry("840x620")
+        self.configure(bg=theme.BG)
         self.repo = JSONRepo("data/habits.json")
 
-        container = tk.Frame(self)
+        container = tk.Frame(self, bg=theme.BG)
         container.pack(fill="both", expand=True)
 
         self.frames = {}
-        for F in (Dashboard, CreateHabit):
+        for F in (StartScreen, Hatchery, CreateHabit, Analytics):
             frame = F(parent=container, controller=self)
             self.frames[F.__name__] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-        self.show("Dashboard")
+        self.show("StartScreen")
 
     def show(self, name):
         frame = self.frames[name]
